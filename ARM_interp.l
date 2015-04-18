@@ -1,5 +1,10 @@
 %{
 
+long int i_offset = 0;
+char *cur_word;
+#define YY_USER_ACTION	i_offset += yyleng;\
+				cur_word = yytext;
+
 #include <string.h>
 #include "y.tab.h"
 
@@ -48,8 +53,16 @@ r[0-9] {
 	/* Discard spaces and tabs */
 }
 
-".global main" {
-	return MAIN;
+".global" {
+	return GLOBAL;
+}
+
+.asciz {
+	return ASCIZ;
+}
+
+\" {
+	return QUOTE;
 }
 
 mov {
@@ -73,7 +86,7 @@ sub {
 }
 
 bl {
-	return BRANCH;
+	return BL;
 }
 
 blt {
@@ -90,6 +103,16 @@ print {
 
 \n {
 	return NEWLINE;
+}
+
+=[a-zA-Z0-9_]+ {
+	yylval.string = strdup(yytext + 1);
+	return FORMAT;
+}
+
+[a-zA-Z0-9_]+":" {
+	yylval.string = strndup(yytext + 1, strlen(yytext) - 1);
+	return LABEL;
 }
 
 \.?[a-zA-Z0-9_]+ {

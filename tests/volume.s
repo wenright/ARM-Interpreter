@@ -1,4 +1,5 @@
-//Will Enright
+// Will Enright
+// Controls LED brightness with potentiometer
 .data
 
 .balign 4

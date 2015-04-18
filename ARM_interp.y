@@ -1,9 +1,11 @@
-%token <string> WORD
+%token <string> WORD FORMAT LABEL
 %token <number> NUMBER REGISTER
 %token COMMA COLON HASH NEWLINE 
-%token MAIN MOV CMP LDR ADD SUB BRANCH BLT BGT PRINT
+%token GLOBAL MOV CMP LDR ADD SUB BL BLT BGT PRINT ASCIZ QUOTE 
 
 %type <number> argument
+
+%start statements
 
 %union	{
 	int number;
@@ -30,38 +32,28 @@ statement:
 	expression
 |
 	NEWLINE
+
 ;
 
+// We can ignore these, they have already been cached
 label:
-	WORD COLON {
-		if (findLabel($1) < 0) {
-			if (num_labels >= max_labels) {
-				// Create additional labels
-				max_labels *= 2;
-				labels = (struct label *) realloc(labels, sizeof(struct label) * max_labels);
-			}
-
-			// Store the name of this label for lookup later
-			labels[num_labels].name = strdup($1);
-
-			// Remember the position in the file to come back to it
-			// fgetpos(yyin, &labels[num_labels].pos);
-			labels[num_labels].pos = ftell(yyin) + strlen($1) + 1;
-
-			num_labels++;
-		}
-	}
+	LABEL
 |
-	MAIN
+	GLOBAL WORD
+|
+	ASCIZ QUOTE WORD QUOTE
 ;
 
 expression:
 	MOV REGISTER COMMA argument {
 		r[$2].int_val = $4;
+		r[$2].type = 'i';
 	}
 |
-	LDR REGISTER COMMA argument {
-
+	LDR REGISTER COMMA FORMAT {
+		// TODO memory leak?
+		r[$2].str_val = strdup($4);
+		r[$2].type = 's';
 	}
 |
 	ADD REGISTER COMMA argument COMMA argument {
@@ -74,16 +66,18 @@ expression:
 		printf("RESULT: %d\n", r[$2].int_val);
 	}
 |
-	BRANCH WORD {
+	BL WORD {
 		// Branch to $2
 		int label_index = findLabel($2);
 
-		// label_index will be -1 if search fails
+		// label_index will be -1 if search fails, implying this label doesn't exist
 		assert(label_index >= 0);
 
+		printf("Branching to label[%d], \"%s\", %lu chars in.\n", 
+			label_index, labels[label_index].name, labels[label_index].pos);
+
 		// Reset yyin to be at he position of the label
-		// fsetpos(yyin, &labels[label_index].pos);
-		fseek(yyin, labels[num_labels].pos, SEEK_SET);
+		fseek(yyin, labels[label_index].pos, SEEK_SET);
 	}
 |
 	CMP REGISTER COMMA argument {
@@ -100,7 +94,8 @@ expression:
 	}
 |
 	PRINT REGISTER {
-		printf(r[0].str_val, r[1].int_val);
+		// printf(r[0].str_val);
+		puts(r[0].str_val);
 	}
 ;
 
@@ -117,36 +112,39 @@ argument:
 %%
 
 void yyerror(const char * s) {
-	fprintf(stderr,"%s\n", s);
+	fprintf(stderr,"Interpreter: %s\n", s);
+	printf("\tUnknown identifier \"%s\"\n", cur_word);
 }
 
-int main(int argc, char **argv) {
-	// yydebug = 1;
-
-	// Load selected file as input
-	if (argc > 1 && (yyin = fopen(argv[argc - 1], "r")) == NULL) {
-		perror("fopen");
-		return 1;
-	}
-
-	// Create initial empty list of labels
-	labels = (struct label *) malloc(sizeof(struct label) * max_labels);
-
-	yyparse();
-
-	// TODO Free things here?
-	for (int i = 0; i < num_labels; ++i) {
-		printf("label %d: name=%s\n", i, labels[i].name);
-		free(labels[i].name);
-	}
-
-	return 0;
-}
-
-int findLabel(char *name) {
+int findLabel (char *name) {
 	for (int i = 0; i < num_labels; ++i)
 		if (!strcmp(labels[i].name, name))
 			return i;
 	
 	return -1;
+}
+
+void addLabel (char *name, long pos) {
+	if (num_labels >= max_labels - 1) {
+		// Create additional labels
+		max_labels *= 2;
+		labels = (struct label *) realloc(labels, sizeof(struct label) * max_labels);
+	}
+
+	// Store the name of this label for lookup later
+	labels[num_labels].name = strdup(name);
+
+	// Remember the position in the file to come back to it
+	labels[num_labels].pos = pos;
+
+	num_labels++;
+}
+
+int findAsciz (char *name) {
+	int i = 0;
+	while (a[i].name)
+		if (!strcmp(a[i].name, name))
+			return i;
+
+	return i;
 }

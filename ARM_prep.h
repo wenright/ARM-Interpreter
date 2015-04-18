@@ -1,5 +1,5 @@
-#ifndef ARM_INTERP_H
-#define ARM_INTERP_H
+#ifndef ARM_PREP_H
+#define ARM_PREP_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,13 +7,17 @@
 #include <assert.h>
 #include <stdint.h>
 
-void yyerror(const char * s);
-int yylex();
+int yylex(void);
+void yyerror(const char *);
+
+int findLabel(char *name);
+void addLabel (char *name, long pos);
+int findAsciz (char *name);
 
 extern FILE *yyin;
-extern long int i_offset;
 
-extern char *cur_word;
+extern long yyleng;
+extern long int offset;
 
 extern int num_labels;
 extern int max_labels;
