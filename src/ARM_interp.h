@@ -1,5 +1,5 @@
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef ARM_INTERP_H
+#define ARM_INTERP_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,26 +7,25 @@
 #include <assert.h>
 #include <stdint.h>
 
-extern int zzparse (void);
-extern int yyparse (void);
-
-int findLabel(char *name);
-void addLabel (char *name, long pos);
-int findAsciz (char *name);
+void yyerror(const char * s);
+int yylex();
 
 extern FILE *yyin;
-extern FILE *zzin;
+extern long int i_offset;
+extern int cur_line;
 
-int num_labels = 0;
-int max_labels = 10;
+extern char *cur_word;
+
+extern int num_labels;
+extern int max_labels;
 
 struct label {
 	char *name;
 	long pos;
 };
 
-struct label *labels;
-struct label entry_point;
+extern struct label *labels;
+extern struct label entry_point;
 
 struct reg {
 	char type;
@@ -44,9 +43,9 @@ struct asciz {
 	char *name;
 };
 
-struct reg r[16];
+extern struct reg r[16];
 
 // TODO allow for more asciz
-struct asciz a[100];
+extern struct asciz a[100];
 
 #endif

@@ -31,14 +31,17 @@ int main(int argc, char **argv) {
 
 	printf("Entry point: %lu\n", entry_point.pos);
 
-	// Next, parse file, executing lines iteratively
-	yyparse();
-
-	// TODO Free things here?
+	// TODO Free labels here?
+	// Print out all of the labels that we have found, for debugging purposes
+	printf("\n--- Labels Found ---\n");
 	for (int i = 0; i < num_labels; ++i) {
 		printf("label %d: name=%s\n", i, labels[i].name);
 		free(labels[i].name);
 	}
+	printf("--------------------\n\n");
+
+	// Next, parse file, executing lines iteratively
+	yyparse();
 
 	return 0;
 }

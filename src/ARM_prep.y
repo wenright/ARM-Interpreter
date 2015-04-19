@@ -1,5 +1,5 @@
-%token <string> LABEL WORD
-%token NEWLINE GLOBAL COMMA ASCIZ QUOTE
+%token <string> LABEL WORD QUOTE
+%token NEWLINE GLOBAL COMMA ASCIZ
 
 %start statements
 
@@ -32,7 +32,6 @@ statement:
 
 label:
 	LABEL {
-		printf("Label found: %s\n", $1);
 		if (entry_point.pos < 0 && !strcmp(entry_point.name, $1))
 			entry_point.pos = offset;
 		else if (findLabel($1) < 0)
@@ -46,7 +45,7 @@ label:
 		addLabel($2, offset);
 	}
 |
-	ASCIZ QUOTE WORD QUOTE {
+	ASCIZ QUOTE {
 		// TODO
 	}
 ;
@@ -67,6 +66,7 @@ expression:
 %%
 
 void yyerror (char const *s) {
- 	fprintf (stderr, "Pre-interpreter: %s\n", s);
+ 	fprintf (stderr, "Pre-interpreter: %s\n\tPossible unknown identifier: \"%s\"\n\t%lu chars deep\n", 
+ 		s, cur_word, offset);
 }
 

@@ -1,7 +1,8 @@
-%token <string> WORD FORMAT LABEL
+%token <string> WORD FORMAT LABEL QUOTE
 %token <number> NUMBER REGISTER
-%token COMMA COLON HASH NEWLINE 
-%token GLOBAL MOV CMP LDR ADD SUB BL BLT BGT PRINT ASCIZ QUOTE 
+%token COMMA HASH NEWLINE 
+%token GLOBAL MOV CMP LDR ADD SUB BL BLT BGT PRINT
+	 ASCIZ PUSH POP CLOSEBRACE OPENBRACE
 
 %type <number> argument
 
@@ -41,7 +42,7 @@ label:
 |
 	GLOBAL WORD
 |
-	ASCIZ QUOTE WORD QUOTE
+	ASCIZ QUOTE
 ;
 
 expression:
@@ -71,7 +72,7 @@ expression:
 		int label_index = findLabel($2);
 
 		// label_index will be -1 if search fails, implying this label doesn't exist
-		assert(label_index >= 0);
+		assert(("Label not found", label_index >= 0));
 
 		printf("Branching to label[%d], \"%s\", %lu chars in.\n", 
 			label_index, labels[label_index].name, labels[label_index].pos);
@@ -97,6 +98,14 @@ expression:
 		// printf(r[0].str_val);
 		puts(r[0].str_val);
 	}
+|
+	PUSH OPENBRACE REGISTER CLOSEBRACE {
+		// TODO
+	}
+|
+	POP OPENBRACE REGISTER CLOSEBRACE {
+		// TODO
+	}
 ;
 
 argument:
@@ -112,8 +121,8 @@ argument:
 %%
 
 void yyerror(const char * s) {
-	fprintf(stderr,"Interpreter: %s\n", s);
-	printf("\tUnknown identifier \"%s\"\n", cur_word);
+	fprintf(stderr,"Interpreter: %s\n\tPossible unknown identifier: \"%s\"\n\t%lu chars deep\n", 
+		s, cur_word, i_offset);
 }
 
 int findLabel (char *name) {

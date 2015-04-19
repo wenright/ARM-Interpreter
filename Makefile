@@ -4,28 +4,28 @@ CC = g++ -g
 LEX=lex
 YACC=yacc
 
-all: interp
+all: interpreter
 
-lex.zz.o: ARM_prep.l 
-	$(LEX) ARM_prep.l
-	$(CC) -c lex.zz.c
+lex.zz.o: src/ARM_prep.l 
+	$(LEX) src/ARM_prep.l
+	$(CC) -c src/lex.zz.c
 
-z.tab.o: ARM_prep.y
-	$(YACC) -t -v -d -p zz -b z ARM_prep.y
-	$(CC) -c z.tab.c
+z.tab.o: src/ARM_prep.y
+	$(YACC) -t -v -d -p zz -b z src/ARM_prep.y
+	$(CC) -c src/z.tab.c
 
 
-lex.yy.o: ARM_interp.l 
-	$(LEX) ARM_interp.l
-	$(CC) -c lex.yy.c
+lex.yy.o: src/ARM_interp.l 
+	$(LEX) src/ARM_interp.l
+	$(CC) -c src/lex.yy.c
 
-y.tab.o: ARM_interp.y
-	$(YACC) -t -v -d ARM_interp.y
-	$(CC) -c y.tab.c
+y.tab.o: src/ARM_interp.y
+	$(YACC) -t -v -d src/ARM_interp.y
+	$(CC) -c src/y.tab.c
 
-interp: clean main.cpp z.tab.o lex.zz.o y.tab.o lex.yy.o
-	$(CC) main.cpp -o interp lex.yy.o y.tab.o lex.zz.o z.tab.o -lfl
+interpreter: clean src/main.cpp src/z.tab.o src/lex.zz.o src/y.tab.o src/lex.yy.o
+	$(CC) src/main.cpp -o src/interpreter src/lex.yy.o src/y.tab.o src/lex.zz.o src/z.tab.o -lfl
 
 clean:
-	rm -f lex.??.c ?.tab.c ?.tab.h ?.output interp *.o
+	rm -f src/lex.??.c src/?.tab.c src/?.tab.h src/?.output src/interp *.o
 

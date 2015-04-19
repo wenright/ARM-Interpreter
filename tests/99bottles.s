@@ -10,7 +10,7 @@ loop:
     sub r3, r0, #1
     ldr r0, =lyric
     bl printf
-    pop {r0}
+    pop {r0} 
  
     sub r0, r0, #1
     cmp r0, #0

@@ -4,9 +4,11 @@
 
 %{
 
+extern char *cur_word;
 long int offset = 0;
 
-#define YY_USER_ACTION offset += yyleng;
+#define YY_USER_ACTION 	offset += yyleng;\
+				cur_word = yytext;
 
 #include <string.h>
 #include "z.tab.h"
@@ -15,12 +17,21 @@ long int offset = 0;
 
 %%
 
+\".*\" {
+	zzlval.string = strndup(yytext + 1, strlen(yytext) - 2);
+	return QUOTE;
+}
+
 ;.*$ {
 	/* Ignore comments starting with semi-colons */
 }
 
 "//".*$ {
 	/* Ignore comments starting with two slashes */
+}
+
+@.*$ {
+	/* Ignore comments starting with at symbol */
 }
 
 [ \t]* {
@@ -31,12 +42,8 @@ long int offset = 0;
 	return GLOBAL;
 }
 
-".asciz" {
+".asciz"|".ascii" {
 	return ASCIZ;
-}
-
-\" {
-	return QUOTE;
 }
 
 \n {
@@ -52,7 +59,7 @@ long int offset = 0;
 	return LABEL;
 }
 
-\.?[a-zA-Z0-9_\[\]=#]+ {
+\.?[a-zA-Z0-9_\[\]=#\{\}]+ {
 	// Everything else
 	zzlval.string = strdup(yytext);
 	return WORD;
