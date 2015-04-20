@@ -5,12 +5,13 @@
 %{
 
 extern char *cur_word;
-long int offset = 0;
-
+extern long int offset;
 #define YY_USER_ACTION 	offset += yyleng;\
 				cur_word = yytext;
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "z.tab.h"
 
 %}

@@ -1,3 +1,5 @@
+// http://rosettacode.org/wiki/99_Bottles_of_Beer/Assembly#ARM_Assembly
+
 .global main
  
 main:

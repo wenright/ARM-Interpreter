@@ -7,12 +7,16 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include "stack.h"
+
 extern int zzparse (void);
 extern int yyparse (void);
 
 int findLabel(char *name);
 void addLabel (char *name, long pos);
 int findAsciz (char *name);
+
+long int offset = 0;
 
 extern FILE *yyin;
 extern FILE *zzin;
@@ -25,30 +29,17 @@ char *cur_word;
 struct label {
 	char *name;
 	long pos;
+
+	char **strings;
+	int num_strings;
+	int max_strings;
 };
 
 struct label *labels;
 struct label entry_point;
 
-struct reg {
-	char type;
-	union {
-		char *str_val;
-		int int_val;
-	};
-};
+int r[16];
 
-struct asciz {
-	// TODO allow for more constants
-	char *strings[10];
-	int strings_i;
-
-	char *name;
-};
-
-struct reg r[16];
-
-// TODO allow for more asciz
-struct asciz a[100];
+int cmp[2];
 
 #endif

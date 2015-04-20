@@ -1,20 +1,57 @@
 %{
 
 extern char *cur_word;
-long int i_offset;
-#define YY_USER_ACTION	i_offset += yyleng;\
+extern long int offset;
+
+#define YY_USER_ACTION	offset += yyleng;\
 				cur_word = yytext;
+				// printf("%s", yytext);
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "y.tab.h"
+
+void clear_buffer () {
+	yy_flush_buffer(YY_CURRENT_BUFFER);
+}
 
 %}
 
 %%
 
+;.*$ {
+	/* Ignore comments starting with semi-colons */
+}
+
+"//".*$ {
+	/* Ignore comments starting with two slashes */
+}
+
+@.*$ {
+	/* Ignore comments starting with at symbol */
+}
+
+[ \t]* {
+	/* Discard spaces and tabs */
+}
+
 \".*\" {
 	yylval.string = strndup(yytext + 1, strlen(yytext) - 1);
 	return QUOTE;
+}
+
+\{ {
+	return OPENBRACE;
+}
+
+\} {
+	return CLOSEBRACE;
+}
+
+0|[1-9][0-9]* {
+	yylval.number = atoi(yytext);
+	return NUMBER;
 }
 
 r1[0-5] {
@@ -85,41 +122,12 @@ pc {
 	return REGISTER;
 }
 
-\{ {
-	return OPENBRACE;
-}
-
-\} {
-	return CLOSEBRACE;
-}
-
-[1-9][0-9]* {
-	yylval.number = atoi(yytext);
-	return NUMBER;
-}
-
 , {
 	return COMMA;
 }
 
 # {
 	return HASH;
-}
-
-;.*$ {
-	/* Ignore comments starting with semi-colons */
-}
-
-"//".*$ {
-	/* Ignore comments starting with two slashes */
-}
-
-@.*$ {
-	/* Ignore comments starting with at symbol */
-}
-
-[ \t]* {
-	/* Discard spaces and tabs */
 }
 
 ".global" {
@@ -163,7 +171,7 @@ bgt {
 }
 
 printf {
-	return PRINT;
+	return PRINTF;
 }
 
 push {
@@ -172,6 +180,10 @@ push {
 
 pop {
 	return POP;
+}
+
+swi {
+	return SWI;
 }
 
 \n {

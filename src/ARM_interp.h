@@ -7,11 +7,18 @@
 #include <assert.h>
 #include <stdint.h>
 
+#include "stack.h"
+
 void yyerror(const char * s);
 int yylex();
+void clear_buffer();
+
+void addLabel (char *name, long pos);
+void addAscii (const char *str);
+void jump_to(const char *name);
 
 extern FILE *yyin;
-extern long int i_offset;
+extern long int offset;
 extern int cur_line;
 
 extern char *cur_word;
@@ -22,30 +29,17 @@ extern int max_labels;
 struct label {
 	char *name;
 	long pos;
+
+	char **strings;
+	int num_strings;
+	int max_strings;
 };
 
 extern struct label *labels;
 extern struct label entry_point;
 
-struct reg {
-	char type;
-	union {
-		char *str_val;
-		int int_val;
-	};
-};
+extern int r[16];
 
-struct asciz {
-	// TODO allow for more constants
-	char *strings[10];
-	int strings_i;
-
-	char *name;
-};
-
-extern struct reg r[16];
-
-// TODO allow for more asciz
-extern struct asciz a[100];
+extern int cmp[2];
 
 #endif

@@ -12,12 +12,13 @@ int main(int argc, char **argv) {
 	}
 
 	// Load selected file as input
-	if ((zzin = yyin = fopen(argv[argc - 1], "r")) == NULL) {
+	zzin = yyin = fopen(argv[argc - 1], "r");
+	if (zzin == NULL || yyin == NULL) {
 		perror("fopen");
 		return 1;
 	}
 
-	// Create initial empty list of labels
+	// Create initial empty list of labels and ascii_labels
 	labels = (struct label *) malloc(sizeof(struct label) * max_labels);
 
 	// First preprocess the file and add all labels to the list
@@ -29,21 +30,14 @@ int main(int argc, char **argv) {
 	else
 		fseek(yyin, entry_point.pos, SEEK_SET);
 
-	printf("Entry point: %lu\n", entry_point.pos);
-
-	// TODO Free labels here?
-	// Print out all of the labels that we have found, for debugging purposes
-	printf("\n--- Labels Found ---\n");
-	for (int i = 0; i < num_labels; ++i) {
-		printf("label %d: name=%s\n", i, labels[i].name);
-		free(labels[i].name);
-	}
-	printf("--------------------\n\n");
+	offset = 0;
 
 	// Next, parse file, executing lines iteratively
 	yyparse();
+	fclose(yyin);
+
+	// TODO free labels names as well
+	free(labels);
 
 	return 0;
 }
-
-

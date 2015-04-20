@@ -11,8 +11,6 @@ int yylex(void);
 void yyerror(const char *);
 
 int findLabel(char *name);
-void addLabel (char *name, long pos);
-int findAsciz (char *name);
 
 extern FILE *yyin;
 
@@ -27,30 +25,15 @@ extern int max_labels;
 struct label {
 	char *name;
 	long pos;
+
+	char **strings;
+	int num_strings;
+	int max_strings;
 };
 
 extern struct label *labels;
 extern struct label entry_point;
 
-struct reg {
-	char type;
-	union {
-		char *str_val;
-		int int_val;
-	};
-};
-
-struct asciz {
-	// TODO allow for more constants
-	char *strings[10];
-	int strings_i;
-
-	char *name;
-};
-
-extern struct reg r[16];
-
-// TODO allow for more asciz
-extern struct asciz a[100];
+extern int r[16];
 
 #endif
