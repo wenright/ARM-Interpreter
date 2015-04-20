@@ -63,14 +63,50 @@ expression:
 	}
 |
 	MUL REGISTER COMMA argument COMMA argument {
-		r[$2] = $4 - $6;
+		r[$2] = $4 * $6;
 	}
 |
 	BL PRINTF {
 		// TODO printf format
-		// TODO "Conditional jump or move depends on uninitialised value"
-		for (int i = 0; i < labels[r[0]].num_strings; i++)
-			puts(labels[r[0]].strings[i]);
+		int cur_reg = 1;
+		for (int i = 0; i < labels[r[0]].num_strings; i++) {
+			char *c = labels[r[0]].strings[i];
+			for (int j = 0; j < strlen(c); j++) {
+				switch (c[j]) {
+					case '%':
+						j++;
+						switch (c[j]) {
+							case 'd':
+								printf("%d", r[cur_reg++]);
+								break;
+
+							case 's':
+								break;
+							default:
+								break;
+						}
+						break;
+
+					case '\\':
+						j++;
+						switch (c[j]) {
+							case 'n':
+								putchar('\n');
+								break;
+							case '0':
+								while(c[j++] == '0');
+								break;
+							default:
+								break;
+						}
+						break;
+
+					default:
+						putchar(c[j]);
+						break;
+				}
+			}
+		}
 	}
 |
 	BL WORD {
@@ -78,8 +114,7 @@ expression:
 	}
 |
 	CMP REGISTER COMMA argument {
-		// TODO set flags based on eq, lt, gt, etc...
-		// Alternatively, do nothing and compute later in BGT etc
+		// Store these two arguments for comparison later
 		cmp[0] = r[$2];
 		cmp[1] = $4;
 	}
