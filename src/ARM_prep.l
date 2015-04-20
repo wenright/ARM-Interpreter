@@ -62,6 +62,6 @@ extern long int offset;
 
 \.?[a-zA-Z0-9_\[\]=#\{\}]+ {
 	// Everything else
-	zzlval.string = strdup(yytext);
+	zzlval.string = yytext;
 	return WORD;
 }

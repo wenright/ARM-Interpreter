@@ -36,7 +36,13 @@ int main(int argc, char **argv) {
 	yyparse();
 	fclose(yyin);
 
-	// TODO free labels names as well
+	// Free all labels and their string values
+	for (int i = 0; i < num_labels; i++) {
+		for (int j = 0; j < labels[i].num_strings; j++)
+			free(labels[i].strings[j]);
+		free(labels[i].strings);
+		free(labels[i].name);
+	}
 	free(labels);
 
 	return 0;

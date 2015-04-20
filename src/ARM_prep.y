@@ -86,6 +86,7 @@ void addLabel (char *name, long pos) {
 
 	// Initialize variables for storing ascii strings
 	labels[num_labels].max_strings = 5;
+	labels[num_labels].num_strings = 0;
 	labels[num_labels].strings = (char **) malloc(sizeof(char *) * labels[num_labels].max_strings);
 
 	num_labels++;
@@ -109,9 +110,9 @@ void addAscii (char *str) {
 	labels[num_labels - 1].num_strings++;
 
 	// Create additional strings if the limit is reached
-	if (labels[num_labels].num_strings == labels[num_labels].max_strings) {
-		labels[num_labels].max_strings *= 2;
-		labels[num_labels].strings = (char **) realloc(labels[num_labels].strings,
-			sizeof(char *) * labels[num_labels].max_strings);
+	if (labels[num_labels - 1].num_strings == labels[num_labels - 1].max_strings) {
+		labels[num_labels - 1].max_strings *= 2;
+		labels[num_labels - 1].strings = (char **) realloc(labels[num_labels - 1].strings,
+			sizeof(char *) * labels[num_labels - 1].max_strings);
 	}
 }

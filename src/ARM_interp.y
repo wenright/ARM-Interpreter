@@ -1,7 +1,7 @@
 %token <string> WORD FORMAT LABEL QUOTE
 %token <number> NUMBER REGISTER
 %token COMMA HASH NEWLINE 
-%token GLOBAL MOV CMP LDR ADD SUB BL BLT BGT PRINTF
+%token GLOBAL MOV CMP LDR ADD SUB MUL BL BLT BLE BGT BGE PRINTF
 	 ASCIZ PUSH POP CLOSEBRACE OPENBRACE SWI
 
 %type <number> argument
@@ -32,6 +32,8 @@ statement:
 |
 	expression
 |
+	ascii
+|
 	NEWLINE
 
 ;
@@ -41,9 +43,6 @@ label:
 	LABEL
 |
 	GLOBAL WORD
-|
-// FIX TODO
-	ASCIZ QUOTE
 ;
 
 expression:
@@ -52,32 +51,26 @@ expression:
 	}
 |
 	LDR REGISTER COMMA FORMAT {
-		// TODO memory leak?
 		r[$2] = findLabel($4);
 	}
 |
 	ADD REGISTER COMMA argument COMMA argument {
 		r[$2] = $4 + $6;
-		// printf("RESULT: %d\n", r[$2]);
 	}
 |
 	SUB REGISTER COMMA argument COMMA argument {
 		r[$2] = $4 - $6;
-		// printf("RESULT: %d - %d = %d\n", $4, $6, r[$2]);
+	}
+|
+	MUL REGISTER COMMA argument COMMA argument {
+		r[$2] = $4 - $6;
 	}
 |
 	BL PRINTF {
-		// TODO load print format into register using label index?
 		// TODO printf format
+		// TODO "Conditional jump or move depends on uninitialised value"
 		for (int i = 0; i < labels[r[0]].num_strings; i++)
 			puts(labels[r[0]].strings[i]);
-	}
-|
-	SWI NUMBER {
-		// Invoke a system call
-		// Command depends on what is in r7
-		// 1 -> exit(), 4 -> write(), etc.
-		exit(r[0]);
 	}
 |
 	BL WORD {
@@ -95,10 +88,34 @@ expression:
 		if (cmp[0] > cmp[1])
 			jump_to($2);
 	}
+|	
+	BGE WORD {
+		if (cmp[0] >= cmp[1])
+			jump_to($2);
+	}
 |
 	BLT WORD {
 		if (cmp[0] < cmp[1]) 
 			jump_to($2);
+	}
+|
+	BLE WORD {
+		if (cmp[0] <= cmp[1]) 
+			jump_to($2);
+	}
+|	
+	SWI NUMBER {
+		// Invoke a system call
+		// Command depends on what is in r7
+		// 1 -> exit(), 4 -> write(), etc.
+		switch (r[7]) {
+			case 1:
+				exit(r[0]);
+				break;
+			default:
+				// Case hasn't been created yet
+				break;
+		}
 	}
 |
 	PUSH OPENBRACE REGISTER CLOSEBRACE {
@@ -126,6 +143,10 @@ argument:
 	HASH NUMBER {
 		$$ = $2;
 	}
+;
+
+ascii:
+	ASCIZ QUOTE
 ;
 
 %%

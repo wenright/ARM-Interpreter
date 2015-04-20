@@ -158,6 +158,10 @@ sub {
 	return SUB;
 }
 
+mul {
+	return MUL;
+}
+
 bl {
 	return BL;
 }
@@ -166,8 +170,16 @@ blt {
 	return BLT;
 }
 
+ble {
+	return BLE;
+}
+
 bgt {
 	return BGT;
+}
+
+bge {
+	return BGE;
 }
 
 printf {
