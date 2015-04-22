@@ -5,7 +5,7 @@ test:
 	sub r1, r3, r1
 	
 	mov r7, #1
-	swi 0
+	swi 0		; Exit
 
 main:
 	mov r0, #8			

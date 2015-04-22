@@ -1,8 +1,8 @@
 %token <string> WORD FORMAT LABEL QUOTE
 %token <number> NUMBER REGISTER
 %token COMMA HASH NEWLINE 
-%token GLOBAL MOV CMP LDR ADD SUB MUL BL BLT BLE BGT BGE PRINTF
-	 ASCIZ PUSH POP CLOSEBRACE OPENBRACE SWI
+%token GLOBAL MOV CMP LDR ADD SUB MUL BE BNE BL BLT BLE BGT BGE
+	 ASCIZ PRINTF SCANF PUSH POP CLOSEBRACE OPENBRACE SWI
 
 %type <number> argument
 
@@ -16,6 +16,8 @@
 %{
 
 #include "ARM_interp.h"
+
+#define YYMAXDEPTH 1000000
 
 %}
 
@@ -109,14 +111,42 @@ expression:
 		}
 	}
 |
+	BL SCANF {
+		// TODO allow for more scanf arguments
+		// TODO does output go into r0 or r1?
+		switch(labels[r[0]].strings[0][1]) {
+			case 'd':
+				scanf("%d", &r[0]);
+				break;
+
+			case 's':
+
+				break;
+
+			default:
+				printf("unknown scanf format\n");
+				break;
+		}
+	}
+|
 	BL WORD {
 		jump_to($2);
 	}
 |
-	CMP REGISTER COMMA argument {
+	CMP argument COMMA argument {
 		// Store these two arguments for comparison later
-		cmp[0] = r[$2];
+		cmp[0] = $2;
 		cmp[1] = $4;
+	}
+|
+	BE WORD {
+		if (cmp[0] == cmp[1])
+			jump_to($2);
+	}
+|
+	BNE WORD {
+		if (cmp[0] != cmp[1])
+			jump_to($2);
 	}
 |
 	BGT WORD {
@@ -148,7 +178,6 @@ expression:
 				exit(r[0]);
 				break;
 			default:
-				// Case hasn't been created yet
 				break;
 		}
 	}

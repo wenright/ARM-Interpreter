@@ -4,6 +4,9 @@
 
 %{
 
+// This program scans through an ARM assembly file once and assigns labels.
+// TODO give line numbers to each line for easier debugging
+
 extern char *cur_word;
 extern long int offset;
 #define YY_USER_ACTION 	offset += yyleng;\
@@ -55,12 +58,12 @@ extern long int offset;
 	return COMMA;
 }
 
-[a-zA-Z0-9_]+: {
+\.?[a-zA-Z0-9_]+: {
 	zzlval.string = strndup(yytext, strlen(yytext) - 1);
 	return LABEL;
 }
 
-\.?[a-zA-Z0-9_\[\]=#\{\}]+ {
+((=\.)?)\.?[a-zA-Z0-9_\[\]=#\{\}]+ {
 	// Everything else
 	zzlval.string = yytext;
 	return WORD;

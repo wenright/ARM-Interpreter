@@ -5,7 +5,6 @@ extern long int offset;
 
 #define YY_USER_ACTION	offset += yyleng;\
 				cur_word = yytext;
-				// printf("%s", yytext);
 
 #include <string.h>
 #include <stdlib.h>
@@ -162,6 +161,14 @@ mul {
 	return MUL;
 }
 
+be {
+	return BE;
+}
+
+bne {
+	return BNE;
+}
+
 bl {
 	return BL;
 }
@@ -186,6 +193,10 @@ printf {
 	return PRINTF;
 }
 
+scanf {
+	return SCANF;
+}
+
 push {
 	return PUSH;
 }
@@ -202,12 +213,12 @@ swi {
 	return NEWLINE;
 }
 
-=[a-zA-Z0-9_]+ {
+=\.?[a-zA-Z0-9_]+ {
 	yylval.string = strdup(yytext + 1);
 	return FORMAT;
 }
 
-[a-zA-Z0-9_]+":" {
+\.?[a-zA-Z0-9_]+: {
 	yylval.string = strndup(yytext + 1, strlen(yytext) - 1);
 	return LABEL;
 }
