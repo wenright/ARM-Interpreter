@@ -1,8 +1,16 @@
 # ARM-Interpreter
-A bug-filled interpreter for ARM assembly
+An interpreter for ARM assembly
+
+## Build
+
+Make sure you have yacc and flex installed first, then just type
+
+``` console
+make
+```
 
 ## Usage
-```
+``` console
 ./interpreter tests/helloworld.s
 ```
 
